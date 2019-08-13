@@ -1,20 +1,13 @@
 package me.valk.disasters.events;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class EventPlayerJoinLobby extends Event {
-	private Player p;
+public class EventGameStarted extends Event {
 	private String lobbyName;
 	
-	public EventPlayerJoinLobby(Player p, String lobbyName) {
-		this.p = p;
+	public EventGameStarted(String lobbyName) {
 		this.lobbyName = lobbyName;
-	}
-	
-	public Player getPlayer() {
-		return p;
 	}
 	
 	public String getLobbyName() {

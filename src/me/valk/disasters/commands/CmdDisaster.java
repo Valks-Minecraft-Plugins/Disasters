@@ -18,6 +18,7 @@ import me.valk.disasters.events.EventPlayerJoinLobby;
 import me.valk.disasters.events.EventPlayerQuitLobby;
 import me.valk.disasters.listeners.ListenerChat;
 import me.valk.disasters.utils.TextModule;
+import me.valk.disasters.utils.Utils;
 
 public class CmdDisaster implements CommandExecutor {
 	@SuppressWarnings("unused")
@@ -125,8 +126,8 @@ public class CmdDisaster implements CommandExecutor {
 					}
 					
 					if (foundLobby) {
-						sender.sendMessage(TextModule.color(messagesConfig.getString("messages.message.loc_input_lobby")));
-						ListenerChat.inputLobbyLoc.add(p.getUniqueId());
+						sender.sendMessage(TextModule.color(messagesConfig.getString("messages.message.input_world")));
+						ListenerChat.inputWorld.add(p.getUniqueId());
 					} else {
 						sender.sendMessage(TextModule.color(messagesConfig.getString("messages.error.lobby_not_found")));
 						return true;
@@ -157,13 +158,13 @@ public class CmdDisaster implements CommandExecutor {
 					}
 					
 					// Create the lobby.
-					int slot = 1;
+					int slot = 0;
 					if (lobbiesConfig.isConfigurationSection("lobbies")) {
 						for (String element : lobbiesConfig.getKeys(false)) {
 							if (element != null) {
 								slot++;
 							}
-						}
+						}	
 					}
 					
 					lobbiesConfig.set("lobbies." + slot + ".name", createLobbyName);
@@ -237,6 +238,8 @@ public class CmdDisaster implements CommandExecutor {
 					}
 					
 					// Player can join the lobby.
+					sender.sendMessage(TextModule.color(messagesConfig.getString("messages.message.joined_lobby")));
+					
 					lobbiesConfig.set(thePath + "players." + (curPlayers + 1), p.getUniqueId().toString());
 					Disasters.lobbiesCM.saveConfig();
 					
@@ -251,29 +254,21 @@ public class CmdDisaster implements CommandExecutor {
 				}
 				
 				if (args[1].equalsIgnoreCase("leave")) {
-					boolean foundPlayer = false;
-					String locExit = "";
-					for (String lobby : lobbies.getKeys(false)) {
-						String path = "lobbies." + lobby + ".";
-						ConfigurationSection players = lobbiesConfig.getConfigurationSection(path + "players");
-						for (String uuid : players.getKeys(false)) {
-							if (uuid.equalsIgnoreCase(p.getUniqueId().toString())) {
-								lobbiesConfig.set(path + "players." + uuid, null);
-								Disasters.lobbiesCM.saveConfig();
-								foundPlayer = true;
-								locExit = path + "loc.end";
-							}
-						}
-					}
-					
-					if (foundPlayer) {
+					String pathToPlayer = Utils.getDisasterPlayerPath(p);
+					if (pathToPlayer != "") {
 						Bukkit.getServer().getPluginManager().callEvent(new EventPlayerQuitLobby(p));
 						sender.sendMessage(TextModule.color(messagesConfig.getString("messages.message.left_lobby")));
 						
 						ConfigLocation configLocation = new ConfigLocation(Disasters.lobbiesCM);
-						Location locationExit = configLocation.get(locExit);
+						
+						String pathToLobby = Utils.getDisasterLobbyPath(p);
+						
+						Location locationExit = configLocation.get(pathToLobby + "loc.end");
 						
 						p.teleport(locationExit);
+						
+						lobbiesConfig.set(pathToPlayer, null);
+						Disasters.lobbiesCM.saveConfig();
 					} else {
 						sender.sendMessage(TextModule.color(messagesConfig.getString("messages.error.not_in_a_lobby")));
 					}

@@ -2,16 +2,15 @@ package me.valk.disasters;
 
 import java.io.File;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.valk.disasters.configs.ConfigLocation;
 import me.valk.disasters.configs.ConfigManager;
 import me.valk.disasters.listeners.ListenerChat;
+import me.valk.disasters.listeners.ListenerGameEnded;
+import me.valk.disasters.listeners.ListenerGameStarted;
+import me.valk.disasters.listeners.ListenerPlayerDeath;
 import me.valk.disasters.listeners.ListenerPlayerJoin;
 import me.valk.disasters.listeners.ListenerPlayerJoinLobby;
 import me.valk.disasters.listeners.ListenerPlayerQuit;
@@ -48,6 +47,9 @@ public class Disasters extends JavaPlugin {
 		pm.registerEvents(new ListenerPlayerJoinLobby(), this);
 		pm.registerEvents(new ListenerPlayerQuit(), this);
 		pm.registerEvents(new ListenerPlayerQuitLobby(), this);
+		pm.registerEvents(new ListenerPlayerDeath(), this);
+		pm.registerEvents(new ListenerGameStarted(), this);
+		pm.registerEvents(new ListenerGameEnded(), this);
 	}
 	
 	private void initConfigs() {
@@ -68,34 +70,9 @@ public class Disasters extends JavaPlugin {
 	private void initConfigLobbies() {
 		lobbiesCM = new ConfigManager("lobbies");
 		lobbiesConfig = lobbiesCM.getConfig();
-		
-		ConfigLocation configLocation = new ConfigLocation(lobbiesCM);
-		
-		defaultSet(lobbiesConfig, "lobbies.1.name", "Template");
-		
-		defaultSet(lobbiesConfig, "lobbies.1.in_progress", false);
-		defaultSet(lobbiesConfig, "lobbies.1.max_players", 3);
-		
-		defaultSet(lobbiesConfig, "lobbies.1.players.1.Steve", "067e6162-3b6f-4ae2-a171-2470b63dff00");
-		defaultSet(lobbiesConfig, "lobbies.1.players.2.valkyrienyanko", "463e6162-3h6f-4ae2-a171-2470b63dur15");
-		defaultSet(lobbiesConfig, "lobbies.1.players.3.Notch", "233e6162-3h6f-6ae2-j129-6670b63yhw38");
-		
-		World templateWorld = Bukkit.getWorlds().get(0);
-		Location templateLocation = templateWorld.getSpawnLocation();
-		
-		if (!lobbiesConfig.isSet("lobbies.1.loc.lobby")) {
-			configLocation.set("lobbies.1.loc.lobby", templateLocation);
+		if (!lobbiesConfig.isConfigurationSection("lobbies")) {
+			lobbiesConfig.createSection("lobbies");
 		}
-		if (!lobbiesConfig.isSet("lobbies.1.loc.game")) {
-			configLocation.set("lobbies.1.loc.game", templateLocation);
-		}
-		if (!lobbiesConfig.isSet("lobbies.1.loc.spectate")) {
-			configLocation.set("lobbies.1.loc.spectate", templateLocation);
-		}
-		if (!lobbiesConfig.isSet("lobbies.1.loc.end")) {
-			configLocation.set("lobbies.1.loc.end", templateLocation);
-		}
-		
 		lobbiesCM.saveConfig();
 	}
 	
@@ -127,6 +104,8 @@ public class Disasters extends JavaPlugin {
 		defaultSet(messagesConfig, "messages.message.loc_input_spectator", "&7Stand where you want the spectator location and then say anything.");
 		defaultSet(messagesConfig, "messages.message.loc_input_end", "&7Stand where you want the end location and then say anything.");
 		defaultSet(messagesConfig, "messages.message.all_locations_set", "&7All locations set!");
+		defaultSet(messagesConfig, "messages.message.joined_lobby", "&7You joined the lobby!");
+		defaultSet(messagesConfig, "messages.message.input_world", "&7Go to the world you want this lobby to be in. &4Warning: This world will be reset everytime the game is finished.");
 		
 		messagesCM.saveConfig();
 	}
