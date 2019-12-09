@@ -1,7 +1,7 @@
 # Disasters
 
 ## About
-Request from anonymous.
+Request from anonymous. Incomplate. Discontinued.
 
 ## Compiling
 1. Clone the repository directly into your IDE.
